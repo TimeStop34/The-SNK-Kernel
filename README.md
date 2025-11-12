@@ -1,2 +1,3 @@
 # The SNK Kernel
-The SNK Kernel (Kernel Kernel). The. Sky-New-Kernel. Kernel.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
