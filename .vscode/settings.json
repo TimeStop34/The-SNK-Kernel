@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.cargo.extraEnv": {
+        "RUSTFLAGS": "--cfg=disable_rust_analyzer_warnings"
+    },
+    "rust-analyzer.check.extraArgs": [
+        "--target=x86_64-unknown-none"
+    ]
+}

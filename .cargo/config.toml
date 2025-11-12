@@ -1,0 +1,11 @@
+[build]
+target = "x86_64-unknown-none"
+
+[target.x86_64-unknown-none]
+linker = "ld"  # или "x86_64-elf-ld"
+rustflags = [
+    "-C", "link-arg=-Tlinker.ld",
+    "-C", "link-arg=-nostdlib",        # ← ДОБАВИТЬ
+    "-C", "link-arg=-static",          # ← ДОБАВИТЬ
+    "-C", "link-arg=-no-pie",          # ← ДОБАВИТЬ
+]
