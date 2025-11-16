@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "compare": "c",
+        "file_system.h": "c",
+        "memory.h": "c",
+        "programs.h": "c",
+        "keyboard.h": "c",
+        "ata.h": "c",
+        "display.h": "c",
+        "pit.h": "c",
+        "drivers.h": "c",
+        "idt_pic.h": "c",
+        "typeinfo": "c",
+        "asm.h": "c",
+        "device.h": "c",
+        "ps2.h": "c"
+    }
+}
