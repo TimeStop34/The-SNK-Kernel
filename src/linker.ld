@@ -1,61 +1,54 @@
-ENTRY(kmain)
+ENTRY(early_boot)
+
+__physical_base = 0x10000;
+__virtual_base = 0xC0000000;
 
 SECTIONS
 {
-
-
   /* Для GRUB */
-  .multiboot :{
+  .multiboot : {
     *(.multiboot)
   }
 
-
-  /* Специальная память | Special memory */
-
-  . = 1M;
-  .init_section : {
-    *(.init_section)
+  /* Boot section по фиксированному адресу */
+  . = __physical_base;
+  
+  .boot : AT(__physical_base) {
+    *(.boot)
   }
 
+  /* Переходим к следующему физическому адресу для .text */
+  . = 0x20000;
 
-  /* Основной код и данные ОС */
-  . = 2M;
-  .text : {
+  /* Виртуальные адреса начинаются с 0xC0000000 */
+  . = __virtual_base + 0x20000;
+
+  .text : AT(ADDR(.text) - __virtual_base) {
     *(.text)
   }
 
-  .rodata : {
+  .init_section : AT(ADDR(.init_section) - __virtual_base) {
+    *(.init_section)
+  }
+
+  .rodata : AT(ADDR(.rodata) - __virtual_base) {
     *(.rodata*)
   }
 
-  .data : {
+  .data : AT(ADDR(.data) - __virtual_base) {
     *(.data)
   }
 
-  .bss : {
+  .bss : AT(ADDR(.bss) - __virtual_base) {
     *(.bss)
     *(COMMON)
   }
 
-  .drivers : {
-    /* Создаем символы-маркеры начала и конца секции */
-    __start_drivers = .;
-    *(.drivers)      /* Все, что в секции .drivers */
-    __stop_drivers = .;
-  }
-
-  . = 0x30000;
-    .file_system : {
-        *(.file_system)
-    }
+  __kernel_end = .;
   
   /*
-
   .rodata (Read-Only Data) - константы, строки и любые данные, которые НЕ ИЗМЕНЯЮТСЯ во время работы программы.
   .data (Initialized Data) - переменные, которым присвоено начальное значение.
   .bss (Uninitialized Data) - переменные без начального значение (не инициализированные или инициализированные нулём).
-
   */
-
-
 }

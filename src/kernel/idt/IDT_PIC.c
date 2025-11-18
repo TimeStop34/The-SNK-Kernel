@@ -1,5 +1,5 @@
 #include "IDT_PIC.h"
-#include "../../libs/asm.h"
+#include "../libs/asm/asm.h"
 
 // Главная структура: хранит обработчик для конкретного прерывания
 struct IDT_row

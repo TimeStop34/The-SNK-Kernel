@@ -8,23 +8,26 @@ const unsigned int multiboot_header[] = {
 
 
 // libs
-#include "libs/string.h"
+//#include "libs/string.h"
 // #include "libs/time.h"
 // #include "libs/io.h"
-#include "libs/asm.h"
+#include "kernel/libs/asm/asm.h"
 // #include "libs/memory.h"
 
 // Kernel
 #include "kernel/gdt/gdt.h"
 #include "kernel/idt/IDT_PIC.h"
-#include "memory.h"
+#include "kernel/memory/memory_system.h"
+
+#include "kernel/libs/io/io.h"
 
 // drivers
-#include "drivers/drivers.h"
-#include "drivers/keyboard/keyboard.h"
-#include "drivers/display/display.h"
-#include "drivers/pit/pit.h"
-#include "drivers/disks/ata/ata.h"
+// #include "drivers/drivers.h"
+// #include "drivers/keyboard/keyboard.h"
+// #include "drivers/display/display.h"
+// #include "drivers/pit/pit.h"
+// #include "drivers/vfs/vfs.h"
+// #include "drivers/disks/disk.h"
 
 // api
 // include "api/api.h" <- not implemented
@@ -54,41 +57,41 @@ struct multiboot_mmap_struct {
 
 // For kernel logs
 // Without new line!
-void kernel_log(unsigned char* text){
-	for (short i = 0; text[i] != '\0'; i++)
-		display_print_symbol(text[i], DISPLAY_CURSOR_POS_X, DISPLAY_CURSOR_POS_Y, 7, 0);
-}
+// void kernel_log(unsigned char* text){
+// 	for (short i = 0; text[i] != '\0'; i++)
+// 		display_print_symbol(text[i], DISPLAY_CURSOR_POS_X, DISPLAY_CURSOR_POS_Y, 7, 0);
+// }
 
 // Panic Mode
 // where_function - в какой функции произошла ошибка
 // text - текст ошибки
-void kernel_panic(unsigned char* where_function, unsigned char* text, int code) {
-    interrupt_disable();
-
-    DISPLAY_CURSOR_POS_X = 0;
-    DISPLAY_CURSOR_POS_Y = 0;
-    kernel_log(" - - SNK Panic - - ");
-    display_new_line();
-
-    kernel_log(where_function);
-    kernel_log("(): ");
-    kernel_log(text);
-    
-    // Выводим код
-    unsigned char code_buffer[16];
-    itos(code, code_buffer);
-    kernel_log(" ");
-    kernel_log(code_buffer);
-    
-    display_new_line();
-    while(1) cpu_pause();
-}
+// void kernel_panic(unsigned char* where_function, unsigned char* text, int code) {
+//     interrupt_disable();
+//
+//     DISPLAY_CURSOR_POS_X = 0;
+//     DISPLAY_CURSOR_POS_Y = 0;
+//     kernel_log(" - - SNK Panic - - ");
+//     display_new_line();
+//
+//     kernel_log(where_function);
+//     kernel_log("(): ");
+//     kernel_log(text);
+//  
+//     // Выводим код
+//     unsigned char code_buffer[16];
+//     itos(code, code_buffer);
+//     kernel_log(" ");
+//     kernel_log(code_buffer);
+//  
+//     display_new_line();
+//     while(1) cpu_pause();
+// }
 
 // Initialization Section  (Old: Kernel Loop)
-__attribute__((section(".init_section"))) void init_section(void) {
-	int signal = 0;
-	kernel_panic("Init section", "Init process (PID 1) terminated with exit code", signal);
-}
+void init_section(void) {
+	kprintf("Сontrol has been transferred to the initialization system");
+	while(1) cpu_pause();
+} __attribute__((section(".init_section")))
 
 
 // Check System: memory, disks
@@ -108,9 +111,10 @@ __attribute__((section(".init_section"))) void init_section(void) {
 // 	if (!disk_flag) kernel_panic("check_system", "The drive was not found or does not meet the requirements!");
 // }
 
-
 // Main
 void kmain(void){
+	terminal_initialize();
+    kprintf("MyOS Booted! Starting initialization...\n");
 
 	// GDT table init
 	gdt_init();
@@ -118,25 +122,23 @@ void kmain(void){
 	// Get Multiboot Info
 	struct multiboot_struct* multiboot_info_addr = get_ebx();
 	struct multiboot_struct multiboot_info = *multiboot_info_addr;
-
 	// Shared memory init
 	// shared_memory_init(); <- deprecated, new realization:
 
-	// Memory init, init a `kernel memory database`
+	// Memory init
 	{ 
-		unsigned int mmap_count; 
 	
-		init_memory_system(make_mmap_array(multiboot_info_addr, multiboot_info.mmap_length, &mmap_count), mmap_count);
-
-		// TODO: сделать `kernel memory database`, для удобных запросов из под ядра.
-		// Или перенести на функции определенных мест: `kernel memory database` будет представлять собой набор ссылок на функции
+		init_memory(multiboot_info_addr);
 	}
+	    
 
 	// Early initialization
 	{
-		interrupt_disable();
+		//interrupt_disable();
 
-		drivers_init();
+		//disk_system_init();
+
+		//drivers_init();
 	}
 	
 	// IDT setup
@@ -145,18 +147,18 @@ void kmain(void){
 
 	// Later initialization
 	{
-		interrupt_enable();
+		//interrupt_enable();
 		
-		drivers_init_late();
+		//drivers_init_late();
 
-		// check_system(); <- not implementated
+		// check_system(); <- not implemented
 	}
 
 	// Endless loop
-	init_section();
+	//init_section();
 
-	drivers_shutdown_all();
-	critical_drivers_shutdown();
+	//drivers_shutdown_all();
+	//critical_drivers_shutdown();
 
-	// kernel_panic("kmain", "End");
+	kpanic("Kernel init-tion finished!");
 }

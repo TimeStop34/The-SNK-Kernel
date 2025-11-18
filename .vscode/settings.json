@@ -13,6 +13,28 @@
         "typeinfo": "c",
         "asm.h": "c",
         "device.h": "c",
-        "ps2.h": "c"
+        "ps2.h": "c",
+        "vfs.h": "c",
+        "disk.h": "c",
+        "stdint.h": "c",
+        "pmm.h": "c",
+        "spinlock.h": "c",
+        "multiboot.h": "c",
+        "vmm.h": "c",
+        "cstdint": "c",
+        "io.h": "c",
+        "array": "c",
+        "deque": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "types.h": "c",
+        "memory_system.h": "c",
+        "simple_operations.h": "c"
+    },
+    "files.exclude": {
+        "**/.*/": true
     }
 }
