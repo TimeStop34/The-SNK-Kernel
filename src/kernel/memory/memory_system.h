@@ -1,5 +1,5 @@
 #pragma once
-#include "pmm/pmm.h"
+#include "vmm/vmm.h"
 
 /*
     Инициализирует систему памяти: PMM & VMM

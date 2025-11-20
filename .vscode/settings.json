@@ -32,7 +32,8 @@
         "initializer_list": "c",
         "types.h": "c",
         "memory_system.h": "c",
-        "simple_operations.h": "c"
+        "simple_operations.h": "c",
+        "paging.h": "c"
     },
     "files.exclude": {
         "**/.*/": true

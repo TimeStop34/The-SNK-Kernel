@@ -89,7 +89,7 @@ struct multiboot_mmap_struct {
 
 // Initialization Section  (Old: Kernel Loop)
 void init_section(void) {
-	kprintf("Сontrol has been transferred to the initialization system");
+	kprintf("Control has been transferred to the initialization system");
 	while(1) cpu_pause();
 } __attribute__((section(".init_section")))
 
@@ -114,7 +114,7 @@ void init_section(void) {
 // Main
 void kmain(void){
 	terminal_initialize();
-    kprintf("MyOS Booted! Starting initialization...\n");
+    kprintf("SNK Booted! Starting initialization...\n");
 
 	// GDT table init
 	gdt_init();
@@ -144,7 +144,7 @@ void kmain(void){
 	// IDT setup
 	PIC_remap();
 	IDT_load();
-
+	
 	// Later initialization
 	{
 		//interrupt_enable();
@@ -155,7 +155,7 @@ void kmain(void){
 	}
 
 	// Endless loop
-	//init_section();
+	init_section();
 
 	//drivers_shutdown_all();
 	//critical_drivers_shutdown();

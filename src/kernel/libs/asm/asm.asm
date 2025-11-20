@@ -11,6 +11,17 @@ global get_ebx, get_edx, get_esi
 global clear_ah, clear_al, clear_bh, clear_bl, clear_ch, clear_cl, clear_dh, clear_dl
 global clear_ax, clear_bx, clear_cx, clear_dx
 
+global get_cr0, get_cr2, get_cr3, get_cr4
+global set_cr0, set_cr2, set_cr3, set_cr4
+
+global get_cs, get_ds, get_es, get_fs, get_gs, get_ss
+global set_cs, set_ds, set_es, set_fs, set_gs, set_ss
+
+global get_dr0, get_dr1, get_dr2, get_dr3, get_dr6, get_dr7
+global set_dr0, set_dr1, set_dr2, set_dr3, set_dr6, set_dr7
+
+global get_tr6, get_tr7, set_tr6, set_tr7
+
 section .text
 
 
@@ -269,4 +280,173 @@ clear_cx:
 
 clear_dx:
     xor dx, dx
+    ret
+
+; Control Registers
+get_cr0:
+    mov eax, cr0
+    ret
+
+get_cr2:
+    mov eax, cr2
+    ret
+
+get_cr3:
+    mov eax, cr3
+    ret
+
+get_cr4:
+    mov eax, cr4
+    ret
+
+set_cr0:
+    mov eax, [esp + 4]
+    mov cr0, eax
+    ret
+
+set_cr2:
+    mov eax, [esp + 4]
+    mov cr2, eax
+    ret
+
+set_cr3:
+    mov eax, [esp + 4]
+    mov cr3, eax
+    ret
+
+set_cr4:
+    mov eax, [esp + 4]
+    mov cr4, eax
+    ret
+
+; Segment Registers - Get
+get_cs:
+    mov ax, cs
+    ret
+
+get_ds:
+    mov ax, ds
+    ret
+
+get_es:
+    mov ax, es
+    ret
+
+get_fs:
+    mov ax, fs
+    ret
+
+get_gs:
+    mov ax, gs
+    ret
+
+get_ss:
+    mov ax, ss
+    ret
+
+; Segment Registers - Set
+set_cs:
+    mov ax, [esp + 4]
+    mov cs, ax
+    ret
+
+set_ds:
+    mov ax, [esp + 4]
+    mov ds, ax
+    ret
+
+set_es:
+    mov ax, [esp + 4]
+    mov es, ax
+    ret
+
+set_fs:
+    mov ax, [esp + 4]
+    mov fs, ax
+    ret
+
+set_gs:
+    mov ax, [esp + 4]
+    mov gs, ax
+    ret
+
+set_ss:
+    mov ax, [esp + 4]
+    mov ss, ax
+    ret
+
+; Debug Registers - Get
+get_dr0:
+    mov eax, dr0
+    ret
+
+get_dr1:
+    mov eax, dr1
+    ret
+
+get_dr2:
+    mov eax, dr2
+    ret
+
+get_dr3:
+    mov eax, dr3
+    ret
+
+get_dr6:
+    mov eax, dr6
+    ret
+
+get_dr7:
+    mov eax, dr7
+    ret
+
+; Debug Registers - Set
+set_dr0:
+    mov eax, [esp + 4]
+    mov dr0, eax
+    ret
+
+set_dr1:
+    mov eax, [esp + 4]
+    mov dr1, eax
+    ret
+
+set_dr2:
+    mov eax, [esp + 4]
+    mov dr2, eax
+    ret
+
+set_dr3:
+    mov eax, [esp + 4]
+    mov dr3, eax
+    ret
+
+set_dr6:
+    mov eax, [esp + 4]
+    mov dr6, eax
+    ret
+
+set_dr7:
+    mov eax, [esp + 4]
+    mov dr7, eax
+    ret
+
+; Test Registers - Get
+get_tr6:
+    mov eax, tr6
+    ret
+
+get_tr7:
+    mov eax, tr7
+    ret
+
+; Test Registers - Set
+set_tr6:
+    mov eax, [esp + 4]
+    mov tr6, eax
+    ret
+
+set_tr7:
+    mov eax, [esp + 4]
+    mov tr7, eax
     ret

@@ -20,13 +20,16 @@ C_SOURCES = \
     src/kernel/memory/memory_system.c \
     src/kernel/memory.c \
     src/kernel/memory/pmm/pmm.c \
-    src/kernel/memory/simple_operations.c
+    src/kernel/memory/simple_operations.c \
+    src/kernel/memory/vmm/vmm.c \
+    src/kernel/memory/vmm/paging/paging.c
 
 # ASM файлы
 ASM_SOURCES = \
     src/kernel/gdt/gdt.asm \
     src/kernel/libs/asm/asm.asm \
-    src/boot.asm
+    src/boot.asm \
+	src/kernel/memory/vmm/paging/tlb.asm
 
 OBJECTS = $(C_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/c/%.o)
 ASM_OBJECTS = $(ASM_SOURCES:$(SRCDIR)/%.asm=$(OBJDIR)/asm/%.o)
@@ -62,7 +65,8 @@ make_iso:
 run:
 	qemu-system-i386 -no-reboot -no-shutdown -serial stdio -m 10M \
 	-drive file=output/os.iso,format=raw,if=ide,index=1,media=cdrom \
-	-boot d
+	-boot d \
+    -d cpu_reset,int,guest_errors -D qemu.log
 
 
 real_all: build make_iso run

@@ -1,4 +1,5 @@
 #pragma once
 #include "paging/paging.h"
+#include "../pmm/pmm.h"
 
-extern page_directory_entry_t* kernel_page_dir;
+void vmm_init(multiboot_info_t *mb_info);
