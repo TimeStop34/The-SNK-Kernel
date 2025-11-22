@@ -1,5 +1,7 @@
 output/
+.vscode/
+programs/
 *.elf
-**.kate-swp
-**.drawio.bkp
-**.drawio.dtmp
+*.kate-swp
+*.log
+.md

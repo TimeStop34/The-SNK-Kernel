@@ -36,8 +36,5 @@
         "paging.h": "c",
         "devices.h": "c",
         "drivertypes_list.h": "c"
-    },
-    "files.exclude": {
-        "**/.*/": true
     }
 }
