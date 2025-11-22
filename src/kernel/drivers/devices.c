@@ -1,5 +1,4 @@
 #include "devices.h"
-#include "pci/pci.h"
 
 #include "drivers.h"
 
