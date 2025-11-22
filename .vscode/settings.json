@@ -33,7 +33,9 @@
         "types.h": "c",
         "memory_system.h": "c",
         "simple_operations.h": "c",
-        "paging.h": "c"
+        "paging.h": "c",
+        "devices.h": "c",
+        "drivertypes_list.h": "c"
     },
     "files.exclude": {
         "**/.*/": true

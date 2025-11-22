@@ -15,6 +15,7 @@ C_SOURCES = \
     src/kernel/libs/spinlock/spinlock.c \
     src/kernel/libs/io/io.c \
     src/kernel/libs/io/serial/serial.c \
+    src/kernel/libs/device/device.c \
     src/kernel/libs/string/string.c \
     src/kernel/idt/IDT_PIC.c \
     src/kernel/memory/memory_system.c \
@@ -22,7 +23,7 @@ C_SOURCES = \
     src/kernel/memory/pmm/pmm.c \
     src/kernel/memory/simple_operations.c \
     src/kernel/memory/vmm/vmm.c \
-    src/kernel/memory/vmm/paging/paging.c
+    src/kernel/memory/vmm/paging/paging.c  
 
 # ASM файлы
 ASM_SOURCES = \
@@ -35,7 +36,8 @@ OBJECTS = $(C_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/c/%.o)
 ASM_OBJECTS = $(ASM_SOURCES:$(SRCDIR)/%.asm=$(OBJDIR)/asm/%.o)
 
 # Все объектные файлы
-ALL_OBJECTS = $(OBJECTS) $(ASM_OBJECTS)
+DRIVERS_OBJECTS = $(shell mkdir -p output/drivers; find output/drivers -name '*.o')
+ALL_OBJECTS = $(OBJECTS) $(ASM_OBJECTS) 
 
 all: real_all
 
@@ -55,8 +57,11 @@ $(OBJDIR)/asm/%.o: $(SRCDIR)/%.asm | $(OBJDIR)
 # Основные цели
 objects: $(ALL_OBJECTS)
 
-build: objects
-	ld $(LDFLAGS) -o output/kernel.elf $(ALL_OBJECTS)
+drivers:
+	$(MAKE) -C ./src/kernel/drivers/
+
+build: objects drivers
+	ld $(LDFLAGS) -o output/kernel.elf $(ALL_OBJECTS) $(DRIVERS_OBJECTS)
 
 make_iso:
 	cp output/kernel.elf iso/boot/

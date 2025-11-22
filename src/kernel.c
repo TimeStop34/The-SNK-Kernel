@@ -28,6 +28,8 @@ const unsigned int multiboot_header[] = {
 // #include "drivers/pit/pit.h"
 // #include "drivers/vfs/vfs.h"
 // #include "drivers/disks/disk.h"
+#include "kernel/drivers/drivers.h"
+#include "kernel/drivers/devices.h"
 
 // api
 // include "api/api.h" <- not implemented
@@ -124,35 +126,15 @@ void kmain(void){
 	struct multiboot_struct multiboot_info = *multiboot_info_addr;
 	// Shared memory init
 	// shared_memory_init(); <- deprecated, new realization:
-
-	// Memory init
-	{ 
-	
-		init_memory(multiboot_info_addr);
-	}
-	    
-
-	// Early initialization
-	{
-		//interrupt_disable();
-
-		//disk_system_init();
-
-		//drivers_init();
-	}
+	init_memory(multiboot_info_addr);
 	
 	// IDT setup
 	PIC_remap();
 	IDT_load();
-	
-	// Later initialization
-	{
-		//interrupt_enable();
-		
-		//drivers_init_late();
 
-		// check_system(); <- not implemented
-	}
+	devices_find();
+
+	driver_manager();
 
 	// Endless loop
 	init_section();
