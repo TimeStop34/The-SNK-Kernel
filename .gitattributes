@@ -5,4 +5,5 @@
 *.h linguist-language=C
 *.cpp linguist-language=C++
 *.hpp linguist-language=C++
+*.asm linguist-language=Nasm
 Makefile linguist-language=Make
