@@ -1,5 +1,3 @@
-output/
-*.elf
-**.kate-swp
-**.drawio.bkp
-**.drawio.dtmp
+rsrc/output
+rsrc/tmp
+c_snk
