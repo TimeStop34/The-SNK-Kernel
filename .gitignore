@@ -1,7 +1,3 @@
-output/
-.vscode/
-programs/
-*.elf
-*.kate-swp
-*.log
-.md
+rsrc/output
+rsrc/tmp
+c_snk

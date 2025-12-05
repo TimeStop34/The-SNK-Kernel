@@ -1,79 +1,62 @@
-CC = gcc
-ASM = nasm
+include Make.properties
 
-CFLAGS = -w -ffreestanding -m32 -Wall -Wextra -fno-pie -nostdlib -fno-asynchronous-unwind-tables
-ASMFLAGS = -f elf32
-LDFLAGS = -m elf_i386 -T src/linker.ld --oformat elf32-i386
+link = $(linker) $(linker_flags) $(if $(strip $(linker_script_name)),-T rsrc/$(linker_script_name),)
+cppcomp = $(cppc) $(cpp_flags) $(if $(strip $(include_directory_name)),-Irsrc/$(include_directory_name),)
+asmcomp = $(asmc) $(asm_flags)
 
-SRCDIR = src
-OBJDIR = output
+OUTDIR := rsrc/build_rsrc/output
+SRCDIR := src
+OBJDIR := rsrc/build_rsrc/tmp
 
-# C файлы
-C_SOURCES = \
-    src/boot.c \
-    src/kernel.c \
-    src/kernel/libs/spinlock/spinlock.c \
-    src/kernel/libs/io/io.c \
-    src/kernel/libs/io/serial/serial.c \
-    src/kernel/libs/device/device.c \
-    src/kernel/libs/string/string.c \
-    src/kernel/idt/IDT_PIC.c \
-    src/kernel/memory/memory_system.c \
-    src/kernel/memory.c \
-    src/kernel/memory/pmm/pmm.c \
-    src/kernel/memory/simple_operations.c \
-    src/kernel/memory/vmm/vmm.c \
-    src/kernel/memory/vmm/paging/paging.c  
+output := $(OUTDIR)/bin/kernel.elf
 
-# ASM файлы
-ASM_SOURCES = \
-    src/kernel/gdt/gdt.asm \
-    src/kernel/libs/asm/asm.asm \
-    src/boot.asm \
-	src/kernel/memory/vmm/paging/tlb.asm
+CPP_SOURCES := $(shell find $(SRCDIR) -name "*.cpp")
+CPP_OBJECTS := $(CPP_SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/cpp/%.o)
 
-OBJECTS = $(C_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/c/%.o)
-ASM_OBJECTS = $(ASM_SOURCES:$(SRCDIR)/%.asm=$(OBJDIR)/asm/%.o)
+ASM_SOURCES := $(shell find $(SRCDIR) -name "*.asm")
+ASM_OBJECTS := $(ASM_SOURCES:$(SRCDIR)/%.asm=$(OBJDIR)/asm/%.o)
 
-# Все объектные файлы
-DRIVERS_OBJECTS = $(shell mkdir -p output/drivers; find output/drivers -name '*.o')
-ALL_OBJECTS = $(OBJECTS) $(ASM_OBJECTS) 
+SOURCES := $(CPP_SOURCES) $(ASM_SOURCES)
+OBJECTS := $(CPP_OBJECTS) $(ASM_OBJECTS)
 
-all: real_all
+# Счетчик для прогресса
+COUNT := 0
+TOTAL_SOURCES := $(words $(SOURCES))
+TOTAL_OBJECTS := $(words $(OBJECTS))
 
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
+$(OBJDIR)/cpp/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
+	@mkdir -p $(dir $@)
+	@$(eval COUNT = $(shell echo $$(($(COUNT)+1))))
+	@echo "[$(COUNT)/$(TOTAL_SOURCES)] [CPPC] $(patsubst $(SRCDIR)/%,%,$<)"
+	@$(cppcomp) -c $< -o $@
 
-# Правило компиляции C файлов
-$(OBJDIR)/c/%.o: $(SRCDIR)/%.c | $(OBJDIR)
-	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Правило для .asm файлов
 $(OBJDIR)/asm/%.o: $(SRCDIR)/%.asm | $(OBJDIR)
-	mkdir -p $(dir $@)
-	$(ASM) $(ASMFLAGS) $< -o $@
+	@mkdir -p $(dir $@)
+	@$(eval COUNT = $(shell echo $$(($(COUNT)+1))))
+	@echo "[$(COUNT)/$(TOTAL_SOURCES)] [ASM] $(patsubst $(SRCDIR)/%,%,$<)"
+	@$(asmcomp) $< -o $@
 
-# Основные цели
-objects: $(ALL_OBJECTS)
+all: info link
 
-drivers:
-	$(MAKE) -C ./src/kernel/drivers/
-
-build: objects drivers
-	ld $(LDFLAGS) -o output/kernel.elf $(ALL_OBJECTS) $(DRIVERS_OBJECTS)
-
-make_iso:
-	cp output/kernel.elf iso/boot/
-	grub2-mkrescue -o output/os.iso ./iso/
-
-run:
-	qemu-system-i386 -no-reboot -no-shutdown -serial stdio -m 10M \
-	-drive file=output/os.iso,format=raw,if=ide,index=1,media=cdrom \
-	-boot d \
-    -d cpu_reset,int,guest_errors -D qemu.log
+link: compile
+	@mkdir -p $(dir $(output))
+	$(link)  -o $(output) $(OBJECTS)
+	@echo "✓ Linked $(TOTAL_OBJECTS) files into $(output)"
 
 
-real_all: build make_iso run
+compile: clean $(OBJECTS)
+	@echo "✓ Compiled $(TOTAL_SOURCES) files"
 
-.PHONY: all run build make_iso objects real_all
+info:
+	@echo "=== Build Information ==="
+	@echo "Compiler: $(cppc)"
+	@echo "Total Sources: $(TOTAL_SOURCES)"
+	@echo "Source files: $(SOURCES)"
+	@echo ""
+
+clean:
+	@echo "Cleaning build directory..."
+	rm -rf $(OBJDIR)/*
+	@echo ""
+
+.PHONY: all info clean compile

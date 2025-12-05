@@ -35,6 +35,8 @@
         "simple_operations.h": "c",
         "paging.h": "c",
         "devices.h": "c",
-        "drivertypes_list.h": "c"
-    }
+        "drivertypes_list.h": "c",
+        "cstdlib": "c"
+    },
+    "rust-analyzer.imports.preferNoStd": true
 }
