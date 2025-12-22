@@ -38,5 +38,6 @@
         "drivertypes_list.h": "c",
         "cstdlib": "c"
     },
-    "rust-analyzer.imports.preferNoStd": true
+    "rust-analyzer.imports.preferNoStd": true,
+    "makefile.configureOnOpen": false
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "types.hpp"
+#include <types.hpp>
 
 
 typedef struct multiboot_info {

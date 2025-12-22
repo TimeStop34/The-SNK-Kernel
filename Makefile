@@ -1,14 +1,19 @@
 include Make.properties
 
-link = $(linker) $(linker_flags) $(if $(strip $(linker_script_name)),-T rsrc/$(linker_script_name),)
-cppcomp = $(cppc) $(cpp_flags) $(if $(strip $(include_directory_name)),-Irsrc/$(include_directory_name),)
+link = $(linker) $(linker_flags) $(if $(strip $(linker_script_name)),-T "rsrc/$(linker_script_name)",)
+cppcomp = $(cppc) $(cpp_flags) $(if $(strip $(include_directory_name)),-I"rsrc/$(include_directory_name)",)
 asmcomp = $(asmc) $(asm_flags)
 
-OUTDIR := rsrc/build_rsrc/output
+vm = qemu-system-$(vm_arch) $(vm_flags)
+
+RSRC = rsrc/build_rsrc
+
+OUTDIR := $(RSRC)/output
 SRCDIR := src
-OBJDIR := rsrc/build_rsrc/tmp
+OBJDIR := $(RSRC)/tmp
 
 output := $(OUTDIR)/bin/kernel.elf
+output-iso := $(OUTDIR)/iso/snk-kernel-$(version)
 
 CPP_SOURCES := $(shell find $(SRCDIR) -name "*.cpp")
 CPP_OBJECTS := $(CPP_SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/cpp/%.o)
@@ -36,27 +41,61 @@ $(OBJDIR)/asm/%.o: $(SRCDIR)/%.asm | $(OBJDIR)
 	@echo "[$(COUNT)/$(TOTAL_SOURCES)] [ASM] $(patsubst $(SRCDIR)/%,%,$<)"
 	@$(asmcomp) $< -o $@
 
-all: info link
+all: info test
+
+prepare_iso: link
+	@cp $(output) "$(RSRC)/iso/boot/snk-kernel-$(version)"
+	@mkdir -p $(OUTDIR)/iso
+	@echo -e 'set default=0\nset timeout=0\n\nmenuentry "SNK Kernel" { \n	multiboot /boot/snk-kernel-$(version) \n	boot \n}' > "$(RSRC)/iso/boot/grub/grub.cfg"
+
+
+iso: prepare_iso
+	$(grub-mkrescue) -o "$(output-iso)" $(RSRC)/iso/
 
 link: compile
-	@mkdir -p $(dir $(output))
-	$(link)  -o $(output) $(OBJECTS)
+	@mkdir -p "$(dir $(output))"
+	$(link)  -o "$(output)" $(OBJECTS)
 	@echo "✓ Linked $(TOTAL_OBJECTS) files into $(output)"
 
 
 compile: clean $(OBJECTS)
+
 	@echo "✓ Compiled $(TOTAL_SOURCES) files"
 
 info:
+	@echo "!=== SNK Info ===!"
+	@echo "SNK Version: $(version)"
+	@echo "Make Properties: Make.properties"
+	@echo "Config file: Config.properties"
+	@echo ""
+
 	@echo "=== Build Information ==="
-	@echo "Compiler: $(cppc)"
+	@echo "Compilers: "
+	@echo -e "\tC: $(cc) (Not supporting C compilation)"
+	@echo -e "\tCPP: $(cppc)"
+	@echo -e "\tASM: $(asmc)"
+	@echo ""
+
+	@echo "Builders:"
+	@echo -e "\tLinker: $(linker)"
+	@echo -e "\tGrub-MKRescue: $(grub-mkrescue)"
+	@echo ""
+
 	@echo "Total Sources: $(TOTAL_SOURCES)"
-	@echo "Source files: $(SOURCES)"
+	@echo -e "Source files: \n\t$(SOURCES)"
+	@echo ""
+
+	@echo "=== Tester Information ==="
+	@echo -e "\tVM: qemu-system-$(vm_arch)"
+	@echo -e "\tVM Flags: $(vm_flags)"
 	@echo ""
 
 clean:
 	@echo "Cleaning build directory..."
 	rm -rf $(OBJDIR)/*
-	@echo ""
+	@echo "" 
+
+test: iso
+	$(vm) -cdrom "$(output-iso)"
 
 .PHONY: all info clean compile
