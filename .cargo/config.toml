@@ -1,0 +1,12 @@
+[unstable]
+build-std = ["core", "compiler_builtins", "alloc"]
+json-target-spec = true
+
+[build]
+target = "./rsrc/i686-none.json"
+
+rustflags = [
+    "-C", "linker=rust-lld",
+    "-C", "link-arg=-T./rsrc/linker.ld",
+    "-C", "relocation-model=static",
+]
